@@ -4,6 +4,6 @@ Requires imgcmp utility (libjasper-runtime package on Debian-based systems) and 
 Requires heirloom-mailx (heirloom-mailx package on Debian-based systems).<br/>
 <br/>
 Files:<br/>
-<b>motion<b/>: bash script.<br/>
-<b>motionvars<b/>: variable definition file (from line 1 to 5: username, password, URL, sender e-mail address, receiver e-mail address). This is read by the script, see comments there.<br/>
-<b>mailbody<b/>: the body of the message to be sent when motion is detected.
+<b>motion</b>: bash script.<br/>
+<b>motionvars</b>: variable definition file (from line 1 to 5: username, password, URL, sender e-mail address, receiver e-mail address). This is read by the script, see comments there.<br/>
+<b>mailbody</b>: the body of the message to be sent when motion is detected.
