@@ -30,6 +30,8 @@ do
 	#streamer -s 640x480 -f jpeg -c /dev/video0 -o $imgdir/image.jpg
 	# get image from loaclly connected webcam using uvccapture
 	#uvccapture -o $imgdir/image.jpg
+	# get image from raspicam using raspistill
+	#raspistill -o $imagedir/image.jpg
 
 	comp=$(imgcmp -f $imgdir/image.jpg -F $imgdir/oldimage.jpg -m $metric 2>/dev/null)
 	set -- $comp
