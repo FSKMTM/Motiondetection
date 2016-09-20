@@ -17,7 +17,7 @@ imgdir="/dev/shm"
 
 ## msg
 echo "Motion detector, Version $version, (C)2012-2016 Miha Ambrož"
-echo "Started at" `date`
+echo "Started at" $(date)
 echo "Interval set to $interval seconds"
 echo "Metric set to $metric, threshold $threshold"
 
