@@ -16,14 +16,20 @@ mailbodyfile="~/mailbody"
 imgdir="/dev/shm"
 
 ## msg
+<<<<<<< HEAD
 echo "Motion detector, Version $version, (C)2012-2017 Miha Ambrož"
 echo "Started at" $(date +%Y%m%d-%H%M%S)
+=======
+echo "Motion detector, Version $version, (C)2012-2016 Miha Ambrož"
+echo "Started at" $(date)
+>>>>>>> 7f88b99689dd21dabd86800b9c2300b525855390
 echo "Interval set to $interval seconds"
 echo "Metric set to $metric, threshold $threshold"
 
 ## main loop
 while true
 do
+<<<<<<< HEAD
         # get image from url
         wget -nc -q --user=$cuser --password=$cpassword $url -O $imgdir/image.jpg
         # get image from locally connected webcam using streamer
@@ -32,6 +38,16 @@ do
         #uvccapture -o $imgdir/image.jpg
         # get image from raspicam using raspistill
         #raspistill -o $imagedir/image.jpg
+=======
+	# get image from url
+	wget -nc -q --user=$cuser --password=$cpassword $url -O $imgdir/image.jpg
+	# get image from locally connected webcam using streamer
+	#streamer -s 640x480 -f jpeg -c /dev/video0 -o $imgdir/image.jpg
+	# get image from loaclly connected webcam using uvccapture
+	#uvccapture -o $imgdir/image.jpg
+	# get image from raspicam using raspistill
+	#raspistill -o $imagedir/image.jpg
+>>>>>>> 7f88b99689dd21dabd86800b9c2300b525855390
 
         comp=$(imgcmp -f $imgdir/image.jpg -F $imgdir/oldimage.jpg -m $metric 2>/dev/null)
         set -- $comp
