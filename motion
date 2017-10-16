@@ -1,22 +1,22 @@
 #!/bin/bash
 
 ## init
-version="0.2"
+version="0.3"
 interval=10
 waitonmotion=90
 metric="mse"
 threshold=280
-cuser=$(sed '1q;d' /root/.motionvars)
-cpassword=$(sed '2q;d' /root/.motionvars)
-url=$(sed '3q;d' /root/.motionvars)
-mailto=$(sed '4q;d' /root/.motionvars)
-mailfrom=$(sed '5q;d' /root/.motionvars)
+cuser=$(sed '1q;d' ~/motionvars)
+cpassword=$(sed '2q;d' ~/motionvars)
+url=$(sed '3q;d' ~/motionvars)
+mailto=$(sed '4q;d' ~/motionvars)
+mailfrom=$(sed '5q;d' ~/motionvars)
 mailsubject="Motion detected"
-mailbodyfile="/root/.motionmailbody"
+mailbodyfile="~/mailbody"
 imgdir="/dev/shm"
 
 ## msg
-echo "Motion detector, Version $version, (C)2012-2016 Miha Ambrož"
+echo "Motion detector, Version $version, (C)2012-2017 Miha Ambrož"
 echo "Started at" $(date +%Y%m%d-%H%M%S)
 echo "Interval set to $interval seconds"
 echo "Metric set to $metric, threshold $threshold"
