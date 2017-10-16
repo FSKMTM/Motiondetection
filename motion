@@ -1,56 +1,70 @@
 #!/bin/bash
 
 ## init
-version="0.2"
+version="0.3"
 interval=10
-waitonmotion=120
+waitonmotion=90
 metric="mse"
 threshold=280
-cuser=$(sed '1q;d' ~/.motionvars)
-cpassword=$(sed '2q;d' ~/.motionvars)
-url=$(sed '3q;d' ~/.motionvars)
-mailto=$(sed '4q;d' ~/.motionvars)
-mailfrom=$(sed '5q;d' ~/.motionvars)
+cuser=$(sed '1q;d' ~/motionvars)
+cpassword=$(sed '2q;d' ~/motionvars)
+url=$(sed '3q;d' ~/motionvars)
+mailto=$(sed '4q;d' ~/motionvars)
+mailfrom=$(sed '5q;d' ~/motionvars)
 mailsubject="Motion detected"
-mailbodyfile="~/.mailbody"
+mailbodyfile="~/mailbody"
 imgdir="/dev/shm"
 
 ## msg
-echo "Motion detector, Version $version, (C)2012-2016 Miha Ambrož"
-echo "Started at" `date`
+echo "Motion detector, Version $version, (C)2012-2017 Miha Ambrož"
+echo "Started at" $(date +%Y%m%d-%H%M%S)
 echo "Interval set to $interval seconds"
 echo "Metric set to $metric, threshold $threshold"
 
 ## main loop
 while true
 do
-	# get image from url
-	wget -nc -q --user=$cuser --password=$cpassword $url -O $imgdir/image.jpg
-	# get image from locally connected webcam using streamer
-	#streamer -s 640x480 -f jpeg -c /dev/video0 -o $imgdir/image.jpg
-	# get image from loaclly connected webcam using uvccapture
-	#uvccapture -o $imgdir/image.jpg
+        # get image from url
+        wget -nc -q --user=$cuser --password=$cpassword $url -O $imgdir/image.jpg
+        # get image from locally connected webcam using streamer
+        #streamer -s 640x480 -f jpeg -c /dev/video0 -o $imgdir/image.jpg
+        # get image from loaclly connected webcam using uvccapture
+        #uvccapture -o $imgdir/image.jpg
+        # get image from raspicam using raspistill
+        #raspistill -o $imagedir/image.jpg
 
-	comp=$(imgcmp -f $imgdir/image.jpg -F $imgdir/oldimage.jpg -m $metric 2>/dev/null)
-	set -- $comp
-	if [ $2 ]; then
-		echo ""
-		echo $metric=$2
-		if [ -e $imgdir/image.jpg ]; then
-			compare_result=$(echo "$2 > $threshold" | bc)
-			if [ $compare_result -eq 1 ]; then
-				echo $(date +"%d.%m.%Y, %X")
-				echo "Threshold exceeded, sending mail"
-				heirloom-mailx -s "$mailsubject" -a $imgdir/image.jpg -r "$mailfrom" "$mailto" < $mailbodyfile
-				echo "Waiting for $waitonmotion seconds..."
-				sleep $waitonmotion
-			else
-				echo "Threshold not exceeded."
-			fi
-		fi
-	else
-		echo "Retrieving initial images..."
-	fi
-	mv $imgdir/image.jpg $imgdir/oldimage.jpg
-	sleep $interval
+        comp=$(imgcmp -f $imgdir/image.jpg -F $imgdir/oldimage.jpg -m $metric 2>/dev/null)
+        set -- $comp
+        if [ $2 ]; then
+                echo ""
+                echo $metric=$2
+                if [ -e $imgdir/image.jpg ]; then
+                        compare_result=$(echo "$2 > $threshold" | bc)
+                        if [ $compare_result -eq 1 ]; then
+                                datestamp=$(date +%Y%m%d-%H%M%S)
+                                echo $datestamp
+                                echo "Threshold exceeded"
+                                echo "Recording 10 frames"
+                                for i in {00..09}
+                                do
+                                        wget -nc -q --user=$cuser --password=$cpassword $url -O                                                                                                      $imgdir/movie$i.jpg
+                                        sleep 0.5
+                                done
+                                cat $imgdir/movie*.jpg | ffmpeg -r 2 -f image2pipe -c:v mjpeg -i                                                                                                      - -vcodec msmpeg4 -b:v 16000k $imgdir/motion$datestamp.avi >/dev/null 2>&1
+                                echo "Sending mail"
+                                heirloom-mailx -s "$mailsubject" -a $imgdir/image.jpg -a $imgdir                                                                                                     /motion$datestamp.avi -r "$mailfrom" "$mailto" < $mailbodyfile
+#                               heirloom-mailx -s "$mailsubject" -a $imgdir/image.jpg -r "$mailf                                                                                                     rom" "$mailto" < $mailbodyfile
+                                rm $imgdir/movie*.jpg $imgdir/*.avi
+                                echo "Waiting for $waitonmotion seconds..."
+                                sleep $waitonmotion
+                                wget -nc -q --user=$cuser --password=$cpassword $url -O $imgdir/                                                                                                     image.jpg
+                        else
+                                echo "Threshold not exceeded."
+                        fi
+                fi
+        else
+                echo "Retrieving initial images..."
+        fi
+        mv $imgdir/image.jpg $imgdir/oldimage.jpg
+        sleep $interval
 done
