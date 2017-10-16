@@ -6,13 +6,13 @@ interval=10
 waitonmotion=90
 metric="mse"
 threshold=280
-cuser=$(sed '1q;d' ~/motionvars)
-cpassword=$(sed '2q;d' ~/motionvars)
-url=$(sed '3q;d' ~/motionvars)
-mailto=$(sed '4q;d' ~/motionvars)
-mailfrom=$(sed '5q;d' ~/motionvars)
+cuser=$(sed '1q;d' /root/.motionvars)
+cpassword=$(sed '2q;d' /root/.motionvars)
+url=$(sed '3q;d' /root/.motionvars)
+mailto=$(sed '4q;d' /root/.motionvars)
+mailfrom=$(sed '5q;d' /root/.motionvars)
 mailsubject="Motion detected"
-mailbodyfile="~/mailbody"
+mailbodyfile="/root/.motionmailbody"
 imgdir="/dev/shm"
 
 ## msg
@@ -47,17 +47,17 @@ do
                                 echo "Recording 10 frames"
                                 for i in {00..09}
                                 do
-                                        wget -nc -q --user=$cuser --password=$cpassword $url -O                                                                                                      $imgdir/movie$i.jpg
+                                        wget -nc -q --user=$cuser --password=$cpassword $url -O $imgdir/movie$i.jpg
                                         sleep 0.5
                                 done
-                                cat $imgdir/movie*.jpg | ffmpeg -r 2 -f image2pipe -c:v mjpeg -i                                                                                                      - -vcodec msmpeg4 -b:v 16000k $imgdir/motion$datestamp.avi >/dev/null 2>&1
+                                cat $imgdir/movie*.jpg | ffmpeg -r 2 -f image2pipe -c:v mjpeg -i - -vcodec msmpeg4 -b:v 16000k $imgdir/motion$datestamp.avi >/dev/null 2>&1
                                 echo "Sending mail"
-                                heirloom-mailx -s "$mailsubject" -a $imgdir/image.jpg -a $imgdir                                                                                                     /motion$datestamp.avi -r "$mailfrom" "$mailto" < $mailbodyfile
-#                               heirloom-mailx -s "$mailsubject" -a $imgdir/image.jpg -r "$mailf                                                                                                     rom" "$mailto" < $mailbodyfile
+                                heirloom-mailx -s "$mailsubject" -a $imgdir/image.jpg -a $imgdir/motion$datestamp.avi -r "$mailfrom" "$mailto" < $mailbodyfile
+#                               heirloom-mailx -s "$mailsubject" -a $imgdir/image.jpg -r "$mailfrom" "$mailto" < $mailbodyfile
                                 rm $imgdir/movie*.jpg $imgdir/*.avi
                                 echo "Waiting for $waitonmotion seconds..."
                                 sleep $waitonmotion
-                                wget -nc -q --user=$cuser --password=$cpassword $url -O $imgdir/                                                                                                     image.jpg
+                                wget -nc -q --user=$cuser --password=$cpassword $url -O $imgdir/image.jpg
                         else
                                 echo "Threshold not exceeded."
                         fi
@@ -68,4 +68,3 @@ do
         mv $imgdir/image.jpg $imgdir/oldimage.jpg
         sleep $interval
 done
-
